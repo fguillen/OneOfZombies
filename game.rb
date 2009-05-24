@@ -14,10 +14,11 @@ end
 HERO_VELOCITY = 2.0
 HERO_LIFE = 50
 BULLET_VELOCITY = 4.0
+BULLET_RETROCESO = 1
 ZOMBIE_VELOCITY = 0.2
 ZOMBIE_TURN_VELOCITY = 25
 ZOMBIE_TURN_DECISION = 10
-ZOMBIE_LIFE = 10
+ZOMBIE_LIFE = 20
 ZOMBIE_SAW = 200
 ZOMBIE_REPRODUCTION = 100
 NUM_ZOMBIES = 10
@@ -30,7 +31,7 @@ class Hero
 
 
   def initialize(window)
-    @image = Gosu::Image.new(window, "media/hero.bmp", false)
+    @image = Gosu::Image.new(window, "media/zanahoria.png", false)
     self.warp( 0, 0 )
     @score = 0
     @angle = 0.0
@@ -103,6 +104,11 @@ class Zombie
       @angle += 90
     end
   end
+  
+  def retroceso( angle )
+    @x += Gosu::offset_x( angle, BULLET_RETROCESO )
+    @y += Gosu::offset_y( angle, BULLET_RETROCESO )
+  end
 
   def see_hero
     Gosu::distance(@x, @y, @window.hero.x, @window.hero.y) < ZOMBIE_SAW
@@ -115,7 +121,7 @@ class Zombie
 end
 
 class Bullet
-  attr_reader :x, :y
+  attr_reader :x, :y, :angle
   
   def initialize(window)
     @window = window
@@ -165,7 +171,7 @@ class Game < Gosu::Window
     @zombie_eaten = Gosu::Sample.new(self, "media/zombie_eaten_2.wav")
     @explosion = Gosu::Sample.new(self, "media/Explosion.wav")
     
-    @image_zombie = Gosu::Image.new(self, "media/zombie.bmp", false)
+    @image_zombie = Gosu::Image.new(self, "media/eye.png", false)
     @image_bullet = Gosu::Image.new(self, "media/bullet.bmp", false)
     
     @hero = Hero.new(self)
@@ -259,6 +265,9 @@ class Game < Gosu::Window
           @bullets.delete( bullet )
           
           zombie.life -= 1
+          
+          zombie.retroceso( bullet.angle )
+          
           if zombie.life <= 0 
             @hero.score += 40
             @explosion.play
