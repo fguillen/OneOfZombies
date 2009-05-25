@@ -22,8 +22,6 @@ class Map
     
     @width = @tiles[0].size
     @height = @tiles.size
-    
-    puts "XX: @tiles: #{tiles.inspect}"
   end
   
   def update_coordinates

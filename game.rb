@@ -38,7 +38,6 @@ class Hero
 
 
   def initialize(window)
-    @image = Gosu::Image.new(window, "media/zanahoria.png", false)
     self.warp( 0, 0 )
     @score = 0
     @angle = 0.0
@@ -229,8 +228,6 @@ class Game < Gosu::Window
     @zombie_eaten = Gosu::Sample.new(self, "media/zombie_eaten_2.wav")
     @explosion = Gosu::Sample.new(self, "media/Explosion.wav")
     
-    @image_zombie = Gosu::Image.new(self, "media/eye.png", false)
-    @image_bullet = Gosu::Image.new(self, "media/bullet.bmp", false)
     
     @hero = Hero.new(self)
     @hero.warp( (Conf::SCREEN_WIDTH / 2) , (Conf::SCREEN_HEIGHT / 2) )
