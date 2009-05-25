@@ -5,25 +5,32 @@ end
 
 require 'gosu'
 
+require 'tool_box'
+require 'map'
+
 module ZOrder
   Background = 0
+  Blood = 1
   Hero = 2
   UI = 3
 end
 
-HERO_VELOCITY = 2.0
-HERO_LIFE = 50
-BULLET_VELOCITY = 4.0
-BULLET_RETROCESO = 1
-ZOMBIE_VELOCITY = 0.2
-ZOMBIE_TURN_VELOCITY = 25
-ZOMBIE_TURN_DECISION = 10
-ZOMBIE_LIFE = 20
-ZOMBIE_SAW = 200
-ZOMBIE_REPRODUCTION = 100
-NUM_ZOMBIES = 10
-SCREEN_WIDTH = 640
-SCREEN_HEIGHT = 480
+module Conf
+  HERO_VELOCITY = 2
+  HERO_LIFE = 50
+  BULLET_VELOCITY = 4.0
+  BULLET_RETROCESO = 5
+  BULLET_LAPSUS = 10
+  ZOMBIE_VELOCITY = 0.2
+  ZOMBIE_TURN_VELOCITY = 25
+  ZOMBIE_TURN_DECISION = 10
+  ZOMBIE_LIFE = 5
+  ZOMBIE_SAW = 200
+  ZOMBIE_REPRODUCTION = 100
+  NUM_ZOMBIES = 10
+  SCREEN_WIDTH = 400
+  SCREEN_HEIGHT = 400
+end
 
 class Hero
   attr_reader :score, :x, :y
@@ -35,7 +42,7 @@ class Hero
     self.warp( 0, 0 )
     @score = 0
     @angle = 0.0
-    @life = HERO_LIFE
+    @life = Conf::HERO_LIFE
     @window = window
     @walking = false
   end
@@ -47,19 +54,26 @@ class Hero
   
   def move
     if( @walking )
-      @x += Gosu::offset_x( @angle, HERO_VELOCITY )
-      @y += Gosu::offset_y( @angle, HERO_VELOCITY )
+      @x += Gosu::offset_x( @angle, Conf::HERO_VELOCITY )
+      @y += Gosu::offset_y( @angle, Conf::HERO_VELOCITY )
     
-      @x = SCREEN_WIDTH    if @x > SCREEN_WIDTH
-      @x = 0               if @x < 0
-      @y = SCREEN_HEIGHT   if @y > SCREEN_HEIGHT
-      @y = 0               if @y < 0
+      @x = (@window.map.width*40)   if @x > (@window.map.width*40)
+      @x = 0                        if @x < 0
+      @y = (@window.map.height*40)  if @y > (@window.map.height*40)
+      @y = 0                        if @y < 0
     end
   end
 
   def draw
-    @image.draw_rot(@x, @y, ZOrder::Hero, @angle)
-    @window.font.draw("#{@life}", @x - 20 , @y - 30 , ZOrder::UI, 1.0, 1.0, 0xffffff00)
+    if(
+      (@x - @window.map.x) + 1 > 0 && 
+      (@x - @window.map.x) - 1 < Conf::SCREEN_WIDTH &&
+      (@y - @window.map.y) + 1 > 0 && 
+      (@y - @window.map.y) - 1 < Conf::SCREEN_HEIGHT
+    )
+      @window.tb.sprite_images[:hero].draw_rot(@x - @window.map.x , @y - @window.map.y , ZOrder::Hero, @angle + 90)
+      @window.font.draw("#{@life}", @x - @window.map.x - 20 , @y - @window.map.y - 30 , ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    end
   end
   
 end
@@ -71,7 +85,7 @@ class Zombie
   def initialize(window)
     self.warp(0,0)
     @angle = rand( (360 * 2) + 1 ) - 360 
-    @life = ZOMBIE_LIFE
+    @life = rand(Conf::ZOMBIE_LIFE) + 1
     @window = window
     @image = @window.image_zombie
   end
@@ -86,19 +100,19 @@ class Zombie
     if see_hero
       @angle = Gosu::angle(@x, @y, @window.hero.x, @window.hero.y)
     else
-      if rand(ZOMBIE_TURN_DECISION) == 0
-        @angle += rand( (ZOMBIE_TURN_VELOCITY * 2) + 1 ) - ZOMBIE_TURN_VELOCITY
+      if rand(Conf::ZOMBIE_TURN_DECISION) == 0
+        @angle += rand( (Conf::ZOMBIE_TURN_VELOCITY * 2) + 1 ) - Conf::ZOMBIE_TURN_VELOCITY
       end
     end
       
 
-    @x += Gosu::offset_x( @angle, ZOMBIE_VELOCITY )
-    @y += Gosu::offset_y( @angle, ZOMBIE_VELOCITY )
+    @x += Gosu::offset_x( @angle, Conf::ZOMBIE_VELOCITY )
+    @y += Gosu::offset_y( @angle, Conf::ZOMBIE_VELOCITY )
     
     if(
-      @x > SCREEN_WIDTH ||
+      @x > (@window.map.width * 40) ||
       @x < 0 ||
-      @y > SCREEN_HEIGHT ||
+      @y > (@window.map.height * 40) ||
       @y < 0
     ) 
       @angle += 90
@@ -106,17 +120,24 @@ class Zombie
   end
   
   def retroceso( angle )
-    @x += Gosu::offset_x( angle, BULLET_RETROCESO )
-    @y += Gosu::offset_y( angle, BULLET_RETROCESO )
+    @x += Gosu::offset_x( angle, Conf::BULLET_RETROCESO )
+    @y += Gosu::offset_y( angle, Conf::BULLET_RETROCESO )
   end
 
   def see_hero
-    Gosu::distance(@x, @y, @window.hero.x, @window.hero.y) < ZOMBIE_SAW
+    Gosu::distance(@x, @y, @window.hero.x, @window.hero.y) < Conf::ZOMBIE_SAW
   end
   
   def draw
-    @image.draw_rot( @x, @y, ZOrder::Hero, @angle )
-    @window.font.draw("#{life}", @x - 20 , @y - 30 , ZOrder::UI, 1.0, 1.0, 0xffffff00)
+    if(
+      (@x - @window.map.x) + 1 > 0 && 
+      (@x - @window.map.x) - 1 < Conf::SCREEN_WIDTH &&
+      (@y - @window.map.y) + 1 > 0 && 
+      (@y - @window.map.y) - 1 < Conf::SCREEN_HEIGHT
+    )
+      @window.tb.sprite_images[:zombie].draw_rot( @x - @window.map.x , @y - @window.map.y, ZOrder::Hero, @angle + 90 )
+      @window.font.draw("#{life}", @x - @window.map.x - 20 , @y - @window.map.y - 30 , ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    end
   end
 end
 
@@ -125,7 +146,6 @@ class Bullet
   
   def initialize(window)
     @window = window
-    @image = @window.image_bullet
     self.warp(0,0)
     self.shoot(0.0)
   end
@@ -140,13 +160,13 @@ class Bullet
   end
   
   def move
-    @x += Gosu::offset_x( @angle, BULLET_VELOCITY )
-    @y += Gosu::offset_y( @angle, BULLET_VELOCITY )
+    @x += Gosu::offset_x( @angle, Conf::BULLET_VELOCITY )
+    @y += Gosu::offset_y( @angle, Conf::BULLET_VELOCITY )
     
     if(
-      @x > SCREEN_WIDTH ||
+      @x > (@window.map.width * 40) ||
       @x < 0 ||
-      @y > SCREEN_HEIGHT ||
+      @y > (@window.map.height * 40) ||
       @y < 0
     ) 
       @window.bullets.delete( self )
@@ -154,20 +174,58 @@ class Bullet
   end
 
   def draw
-    @image.draw_rot( @x, @y, ZOrder::Hero, 0.0 )
+    if(
+      (@x - @window.map.x) + 1 > 0 && 
+      (@x - @window.map.x) - 1 < Conf::SCREEN_WIDTH &&
+      (@y - @window.map.y) + 1 > 0 && 
+      (@y - @window.map.y) - 1 < Conf::SCREEN_HEIGHT
+    )
+      @window.tb.sprite_images[:bullet].draw_rot( @x - @window.map.x , @y - @window.map.y, ZOrder::Hero, @angle + 90 )
+    end
   end
 end
 
+class Blood
+  attr_reader :x, :y
+  
+  def initialize(window, x, y)
+    @window = window
+    @x = x + rand(10)
+    @y = y + 10
+    @image =  @window.tb.sprite_images[:blood][rand(3)]
+  end
+
+  def draw
+    if(
+      (@x - @window.map.x) > 0 && 
+      (@x - @window.map.x) < Conf::SCREEN_WIDTH &&
+      (@y - @window.map.y) > 0 && 
+      (@y - @window.map.y) < Conf::SCREEN_HEIGHT
+    )
+      @image.draw_rot( @x - @window.map.x , @y - @window.map.y, ZOrder::Blood, 0.0 )
+    end
+  end
+end
 
 class Game < Gosu::Window
   attr_accessor :bullets
-  attr_reader :font, :hero, :image_zombie, :image_bullet
+  attr_reader :font, :hero, :image_zombie, :image_bullet, :tb, :map
+  
   
   def initialize
-    super(SCREEN_WIDTH, SCREEN_HEIGHT, false)
+    super(Conf::SCREEN_WIDTH, Conf::SCREEN_HEIGHT, false)
     self.caption = "One Of Zombies Game"
     
+    @bullet_lapsus = 0
+    
+    @tb = ToolBox.new( self )
+    
+    @map = Map.new( self )
+    @map.charge_map
+    
+    
     @beep = Gosu::Sample.new(self, "media/Beep.wav")
+    @shoot = Gosu::Sample.new(self, "media/shoot.mp3")
     @zombie_eaten = Gosu::Sample.new(self, "media/zombie_eaten_2.wav")
     @explosion = Gosu::Sample.new(self, "media/Explosion.wav")
     
@@ -175,10 +233,11 @@ class Game < Gosu::Window
     @image_bullet = Gosu::Image.new(self, "media/bullet.bmp", false)
     
     @hero = Hero.new(self)
-    @hero.warp( (SCREEN_WIDTH / 2) , (SCREEN_HEIGHT / 2) )
+    @hero.warp( (Conf::SCREEN_WIDTH / 2) , (Conf::SCREEN_HEIGHT / 2) )
 
-    @zombies = self.initialize_zombies( NUM_ZOMBIES )
+    @zombies = self.initialize_zombies( Conf::NUM_ZOMBIES )
     @bullets = []
+    @bloods = []
     
     @font = Gosu::Font.new(self, Gosu::default_font_name, 20)
   end
@@ -188,7 +247,7 @@ class Game < Gosu::Window
 
     num.times do
       zombie = Zombie.new(self)
-      zombie.warp( rand(SCREEN_WIDTH), rand(SCREEN_HEIGHT) )
+      zombie.warp( rand(self.map.width*40), rand(self.map.height*40) )
       zombies << zombie
     end
     
@@ -196,6 +255,9 @@ class Game < Gosu::Window
   end
 
   def update
+    
+    @bullet_lapsus -= 1  if @bullet_lapsus > 0
+    
     if button_down? Gosu::Button::KbUp then
       @hero.angle = 0.0
     end
@@ -239,19 +301,20 @@ class Game < Gosu::Window
       @hero.walking = false
     end
     
-    if button_down? Gosu::Button::KbSpace then
+    if( (button_down? Gosu::Button::KbSpace) && (@bullet_lapsus == 0) )
+      @shoot.play
       bullet = Bullet.new( self )
       bullet.warp( @hero.x, @hero.y )
       bullet.shoot( @hero.angle )
       @bullets << bullet
+      @bullet_lapsus = Conf::BULLET_LAPSUS
     end
     
     @hero.move
     @zombies.each { |zombie| zombie.move }
     @bullets.each { |bullet| bullet.move }
     
-    
-    @zombies += initialize_zombies( rand(3) )  if rand(ZOMBIE_REPRODUCTION) == 0
+    @zombies += initialize_zombies( rand(3) )  if rand(Conf::ZOMBIE_REPRODUCTION) == 0
     
     self.colisions
   end
@@ -274,6 +337,9 @@ class Game < Gosu::Window
             
             @zombies.delete zombie
           end
+          
+          # blood
+          @bloods << Blood.new( self, zombie.x, zombie.y )
         end
       end
     end
@@ -287,13 +353,16 @@ class Game < Gosu::Window
   end
 
   def draw
+    @map.draw
     @hero.draw
     @zombies.each { |zombie| zombie.draw }
     @bullets.each { |bullet| bullet.draw }
-    @font.draw("Score: #{@hero.score}", 10, 10, ZOrder::UI, 1.0, 1.0, 0xffffff00)
-    @font.draw("Angle: #{@hero.angle}", 10, 50, ZOrder::UI, 1.0, 1.0, 0xffffff00)
-    @font.draw("Bullets: #{@bullets.size}", 10, 100, ZOrder::UI, 1.0, 1.0, 0xffffff00)
-    @font.draw("Zombies: #{@zombies.size}", 10, 150, ZOrder::UI, 1.0, 1.0, 0xffffff00)
+    @bloods.each { |blood| blood.draw }    
+
+    @font.draw("Score: #{@hero.score}", 10, 10, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    @font.draw("Angle: #{@hero.angle}", 10, 25, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    @font.draw("Bullets: #{@bullets.size}", 10, 40, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    @font.draw("Zombies: #{@zombies.size}", 10, 55, ZOrder::UI, 1.0, 1.0, 0xffff0000)
   end
 
   def button_down(id)
