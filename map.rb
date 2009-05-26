@@ -13,15 +13,17 @@ class Map
   def charge_map
     map_plain = File.read( 'map.txt' )
   
-    map_plain.split( "\n" ).each_with_index do |line, index|
-      @tiles[index] = []
-      line.split( '' ).each do |column|
-        @tiles[index] << column
+    map_plain.split( "\n" ).each_with_index do |row, row_index|
+      @tiles[row_index] = []
+      row.split( '' ).each_with_index do |column, column_index|
+        @tiles[row_index] << Tile.new( @window, (column_index * 40) + 20, (row_index * 40) + 20 , column )
       end
     end
     
     @width = @tiles[0].size
     @height = @tiles.size
+    
+    # puts "XXX: #{@tiles.inspect}"
   end
   
   def update_coordinates
@@ -31,27 +33,57 @@ class Map
     @x = 0  if @x < 0
     @y = 0  if @y < 0
     
-    @x = (@width * 40) - Conf::SCREEN_WIDTH  if @x > (@width * 40) - Conf::SCREEN_WIDTH
-    @y = (@height * 40) - Conf::SCREEN_HEIGHT if @y > (@height * 40) - Conf::SCREEN_HEIGHT
+    @x = (@width * 40) - Conf::SCREEN_WIDTH     if @x > (@width * 40) - Conf::SCREEN_WIDTH
+    @y = (@height * 40) - Conf::SCREEN_HEIGHT   if @y > (@height * 40) - Conf::SCREEN_HEIGHT
   end
   
   def draw
     self.update_coordinates
     
-    @tiles.each_with_index do |line, line_index|
-      line.each_with_index do |column, column_index|
-        if(
-          (column_index * 40) - @x > -40 && 
-          (column_index * 40) - @x < Conf::SCREEN_WIDTH &&
-          (line_index * 40) - @y > -40 && 
-          (line_index * 40) - @y < Conf::SCREEN_HEIGHT
-        )
-          image = @window.tb.tile_images[:tree]   if column == '1'
-          image = @window.tb.tile_images[:house]  if column == '2'
-          image = @window.tb.tile_images[:green]  if column == ' '
-          image.draw( (column_index * 40) - @x, (line_index * 40) - @y, ZOrder::Background )
-        end
+    @tiles.each_with_index do |row, row_index|
+      row.each_with_index do |column, column_index|
+        # puts "XXX: row_index: #{row_index}, column_index: #{column_index}, element: #{@tiles[row_index][column_index]}"
+        
+        @tiles[row_index][column_index].draw  if @tiles[row_index][column_index].visible
       end
     end
+  end
+  
+  def tile_in( x, y )
+    if(
+      x > (@width * 40) ||
+      x < 0 ||
+      y > (@height * 40) ||
+      y < 0
+    )
+     return nil
+    else  
+     return @tiles[y/40][x/40]
+    end
+  end
+  
+  def tiles_touched( x, y, width, height )
+    result = []
+    result << self.tile_in( x, y )
+    result << self.tile_in( x, y - (height/2) ) # up
+    result << self.tile_in( x + (width/2), y - (height/2) ) # up-right
+    result << self.tile_in( x + (width/2), y ) # right
+    result << self.tile_in( x + (width/2), y + (height/2) ) # down-right
+    result << self.tile_in( x + (width/2), y ) # down
+    result << self.tile_in( x - (width/2), y + (height/2) ) # down-left
+    result << self.tile_in( x - (width/2), y ) # left
+    result << self.tile_in( x - (width/2), y - (height/2) ) # up-left
+    
+    return result.compact.uniq
+  end
+  
+  def any_touched_tile_is_not?( method, x, y, width, height )
+    tiles_touched = self.tiles_touched( x, y, width, height )
+    
+    tiles_touched.each do |tile|
+      return true  if !tile.send( method )
+    end
+    
+    return false
   end
 end

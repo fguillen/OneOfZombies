@@ -25,7 +25,8 @@ class ToolBox
     images = {}
     images[:tree] = images_array[0]
     images[:house] = images_array[1]
-    images[:green] = images_array[2]
+    
+    images[:green] = [images_array[3], images_array[4], images_array[5]]
     
     return images
   end
