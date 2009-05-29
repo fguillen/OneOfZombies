@@ -9,6 +9,7 @@ class Zombie < Sprite
     @window = window
     @image = @window.tb.sprite_images[:zombie]
     @z = ZOrder::Hero
+    @velocity = rand() * Conf::ZOMBIE_VELOCITY
     
     super() 
   end
@@ -28,8 +29,8 @@ class Zombie < Sprite
       end
     end
       
-    possible_x = @x + Gosu::offset_x( @angle, Conf::ZOMBIE_VELOCITY )
-    possible_y = @y + Gosu::offset_y( @angle, Conf::ZOMBIE_VELOCITY )
+    possible_x = @x + Gosu::offset_x( @angle, @velocity )
+    possible_y = @y + Gosu::offset_y( @angle, @velocity )
     
     if !@window.map.any_touched_tile_is_not?( :walkable, possible_x, possible_y, @width/3, @height/3 )
       @x = possible_x

@@ -13,8 +13,8 @@ class Sprite
   end
   
   def draw
-    x_draw = (@x - @window.map.x)
-    y_draw = (@y - @window.map.y)
+    x_draw = (@x - @window.map.x).to_i
+    y_draw = (@y - @window.map.y).to_i
     
     if(
       x_draw + (@width/2) > 0 && 
@@ -27,6 +27,14 @@ class Sprite
   end
   
   def draw_inner( x, y )
-    @image.draw_rot( x, y, @z, @angle + 90 )
+    factor_y = 1
+    angle = @angle + 90
+    
+    if angle <= 270 && angle > 0
+      factor_y = -1
+      angle = angle - 180
+    end
+    
+    @image.draw_rot( x, y, @z, angle, 0.5, 0.5, factor_y )
   end
 end

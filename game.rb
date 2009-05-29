@@ -25,18 +25,18 @@ module ZOrder
 end
 
 module Conf
-  HERO_VELOCITY = 2
+  HERO_VELOCITY = 3
   HERO_LIFE = 50
   BULLET_VELOCITY = 10
   BULLET_RETROCESO = 5
   BULLET_LAPSUS = 5
-  ZOMBIE_VELOCITY = 0.2
+  ZOMBIE_VELOCITY = 0.8
   ZOMBIE_TURN_VELOCITY = 25
   ZOMBIE_TURN_DECISION = 10
   ZOMBIE_LIFE = 5
   ZOMBIE_SAW = 200
   ZOMBIE_REPRODUCTION = 100
-  NUM_ZOMBIES = 50
+  NUM_ZOMBIES = 70
   SCREEN_WIDTH = 600
   SCREEN_HEIGHT = 400
 end
@@ -81,6 +81,10 @@ class Game < Gosu::Window
     @bloods = []
     
     @font = Gosu::Font.new(self, Gosu::default_font_name, 20)
+    
+    @milliseconds_before = Gosu::milliseconds
+    @fps = 0
+    @frames_counter = 0
   end
   
   def initialize_hero
@@ -112,6 +116,12 @@ class Game < Gosu::Window
   end
 
   def update
+    @frames_counter += 1
+    if Gosu::milliseconds - @milliseconds_before >= 1000
+      @fps = @frames_counter.to_f / ((Gosu::milliseconds - @milliseconds_before) / 1000.0)
+      @frames_counter = 0
+      @milliseconds_before = Gosu::milliseconds
+    end
     
     @bullet_lapsus -= 1  if @bullet_lapsus > 0
     
@@ -220,6 +230,7 @@ class Game < Gosu::Window
     @font.draw("Angle: #{@hero.angle}", 10, 25, ZOrder::UI, 1.0, 1.0, 0xffff0000)
     @font.draw("Bullets: #{@bullets.size}", 10, 40, ZOrder::UI, 1.0, 1.0, 0xffff0000)
     @font.draw("Zombies: #{@zombies.size}", 10, 55, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    @font.draw("FPS: #{@fps}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xffff0000)
   end
 
   def button_down(id)

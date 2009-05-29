@@ -51,14 +51,18 @@ class Map
   
   def tile_in( x, y )
     if(
-      x > (@width * 40) ||
+      x >= (@width * 40) ||
       x < 0 ||
-      y > (@height * 40) ||
+      y >= (@height * 40) ||
       y < 0
     )
      return nil
     else  
-     return @tiles[y/40][x/40]
+      # puts "@height: #{@height}"
+      # puts "@width: #{@width}"
+      # puts "x: #{x}"
+      # puts "y: #{y}"
+      return @tiles[y/40][x/40]
     end
   end
   
