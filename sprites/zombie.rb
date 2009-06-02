@@ -1,6 +1,6 @@
 class Zombie < Sprite
   attr_reader :x, :y
-  attr_accessor :life
+  attr_accessor :life, :bite
   
   def initialize(window)
     self.warp(0,0)
@@ -10,6 +10,7 @@ class Zombie < Sprite
     @image = @window.tb.sprite_images[:zombie]
     @z = ZOrder::Hero
     @velocity = rand() * Conf::ZOMBIE_VELOCITY
+    @bite = Conf::ZOMBIE_BITE_VELOCITY
     
     super() 
   end
@@ -19,34 +20,73 @@ class Zombie < Sprite
     @y = y
   end
   
-  def move
+  
+  def more_valuable_arround_tile
+    zombie_tile = @window.map.tile_in( @x, @y )
     
-    if self.see_hero?
-      @angle = Gosu::angle(@x, @y, @window.hero.x, @window.hero.y)
+    total_tiles = @window.map.tiles_walkables_arround( zombie_tile.row, zombie_tile.column, false )
+    total_tiles << zombie_tile
+    total_tiles.sort!{ |a,b| b.zombie_value <=> a.zombie_value }
+    
+    if total_tiles.first.zombie_value == total_tiles.last.zombie_value
+      result = nil
     else
+      result = total_tiles.first
+    end
+    
+    return result
+  end
+
+  def move
+    @bite -= 1  if @bite > 0
+    
+    
+    tile_to_go = self.more_valuable_arround_tile
+    
+    if tile_to_go.nil?
       if rand(Conf::ZOMBIE_TURN_DECISION) == 0
         @angle += rand( (Conf::ZOMBIE_TURN_VELOCITY * 2) + 1 ) - Conf::ZOMBIE_TURN_VELOCITY
       end
-    end
-      
-    possible_x = @x + Gosu::offset_x( @angle, @velocity )
-    possible_y = @y + Gosu::offset_y( @angle, @velocity )
-    
-    if !@window.map.any_touched_tile_is_not?( :walkable, possible_x, possible_y, @width/3, @height/3 )
-      @x = possible_x
-      @y = possible_y
+    else
+      @angle = Gosu::angle( @x, @y, tile_to_go.x, tile_to_go.y )
     end
     
-    # se da la vuelta
-    if(
-      @x > (@window.map.width * 40) ||
-      @x < 0 ||
-      @y > (@window.map.height * 40) ||
-      @y < 0
-    ) 
-      @angle += 90
-    end
+    @x += Gosu::offset_x( @angle, @velocity )
+    @y += Gosu::offset_y( @angle, @velocity )
+    
+    @x = (@window.map.width*40) -1    if @x > (@window.map.width*40) - 1
+    @x = 0                            if @x < 0
+    @y = (@window.map.height*40) -1   if @y > (@window.map.height*40) - 1
+    @y = 0                            if @y < 0
   end
+  
+  # def move
+  #   if self.see_hero?
+  #     @angle = Gosu::angle(@x, @y, @window.hero.x, @window.hero.y)
+  #   else
+  #     if rand(Conf::ZOMBIE_TURN_DECISION) == 0
+  #       @angle += rand( (Conf::ZOMBIE_TURN_VELOCITY * 2) + 1 ) - Conf::ZOMBIE_TURN_VELOCITY
+  #     end
+  #   end
+  #     
+  #   possible_x = @x + Gosu::offset_x( @angle, @velocity )
+  #   possible_y = @y + Gosu::offset_y( @angle, @velocity )
+  #   
+  #   if !@window.map.any_touched_tile_is_not?( :walkable, possible_x, possible_y, @width/3, @height/3 )
+  #     @x = possible_x
+  #     @y = possible_y
+  #   end
+  #   
+  #   # se da la vuelta
+  #   if(
+  #     @x > (@window.map.width * 40) ||
+  #     @x < 0 ||
+  #     @y > (@window.map.height * 40) ||
+  #     @y < 0
+  #   ) 
+  #     @angle += 90
+  #   end
+  # end
   
   def retroceso( angle )
     @x += Gosu::offset_x( angle, Conf::BULLET_RETROCESO )

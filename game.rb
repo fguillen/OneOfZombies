@@ -12,6 +12,8 @@ require 'sprites/blood'
 require 'sprites/bullet'
 require 'sprites/zombie'
 require 'sprites/hero'
+require 'sprites/helicopter'
+require 'sprites/innocent'
 require 'sprites/tile'
 
 
@@ -36,9 +38,14 @@ module Conf
   ZOMBIE_LIFE = 5
   ZOMBIE_SAW = 200
   ZOMBIE_REPRODUCTION = 100
-  NUM_ZOMBIES = 70
+  ZOMBIE_BITE_VELOCITY = 10 
+  NUM_ZOMBIES = 20
   SCREEN_WIDTH = 600
   SCREEN_HEIGHT = 400
+  INNOCENT_LIFE = 4
+  INNOCENT_VELOCITY = HERO_VELOCITY 
+  INNOCENT_SAW = 200
+  NUM_INNOCENTS = 30
 end
 
 
@@ -51,7 +58,8 @@ end
 
 class Game < Gosu::Window
   attr_accessor :bullets
-  attr_reader :font, :hero, :image_zombie, :image_bullet, :tb, :map
+  attr_reader :font, :font_small, :hero, :image_zombie, :image_bullet, :tb, :map, :innocents, :zombies
+  attr_reader :helicopter
   
   
   def initialize
@@ -69,22 +77,28 @@ class Game < Gosu::Window
     @beep = Gosu::Sample.new(self, "media/Beep.wav")
     @shoot = Gosu::Sample.new(self, "media/shoot.mp3")
     @zombie_eaten = Gosu::Sample.new(self, "media/zombie_eaten_2.wav")
+    @helicopter_get_an_innocent = Gosu::Sample.new(self, "media/helicopter_get_an_innocent.wav")
     @explosion = Gosu::Sample.new(self, "media/Explosion.wav")
+    @aahhh = Gosu::Sample.new(self, "media/aahhh.wav")
     
     
     @hero = self.initialize_hero
-    
+    @helicopter = self.initialize_helicopter
 
 
     @zombies = self.initialize_zombies( Conf::NUM_ZOMBIES )
+    @innocents = self.initialize_innocents( Conf::NUM_INNOCENTS )
     @bullets = []
     @bloods = []
     
     @font = Gosu::Font.new(self, Gosu::default_font_name, 20)
+    @font_small = Gosu::Font.new(self, Gosu::default_font_name, 10)
     
     @milliseconds_before = Gosu::milliseconds
     @fps = 0
     @frames_counter = 0
+    
+    @innocents_saved = 0
   end
   
   def initialize_hero
@@ -96,6 +110,17 @@ class Game < Gosu::Window
     end
     
     return hero
+  end
+  
+  def initialize_helicopter
+    helicopter = Helicopter.new(self)
+    helicopter.warp( (Conf::SCREEN_WIDTH / 2) , (Conf::SCREEN_HEIGHT / 2) )
+    
+    while( self.map.any_touched_tile_is_not?( :walkable, helicopter.x, helicopter.y, helicopter.width, helicopter.height ) ) do
+      helicopter.warp( rand(self.map.width*40), rand(self.map.height*40) )
+    end
+    
+    return helicopter
   end
 
   def initialize_zombies( num )
@@ -113,6 +138,23 @@ class Game < Gosu::Window
     end
     
     return zombies
+  end
+  
+  def initialize_innocents( num )
+    innocents = []
+
+    while( innocents.size < num ) do
+      x = rand(self.map.width*40)
+      y = rand(self.map.height*40)
+
+      if !self.map.any_touched_tile_is_not?( :walkable, x, y, 30, 30 )
+        innocent = Innocent.new(self)
+        innocent.warp( x, y )
+        innocents << innocent
+      end
+    end
+    
+    return innocents
   end
 
   def update
@@ -180,6 +222,8 @@ class Game < Gosu::Window
     @hero.move
     @zombies.each { |zombie| zombie.move }
     @bullets.each { |bullet| bullet.move }
+    @innocents.each { |innocent| innocent.move }
+    @map.update
     
     # @zombies += initialize_zombies( rand(3) )  if rand(Conf::ZOMBIE_REPRODUCTION) == 0
     
@@ -209,12 +253,61 @@ class Game < Gosu::Window
           @bloods << Blood.new( self, zombie.x, zombie.y )
         end
       end
+      
+      @innocents.each do |innocent|
+        if Gosu::distance(bullet.x, bullet.y, innocent.x, innocent.y) < 10 then
+          @hero.score -= 10
+          @beep.play
+          @bullets.delete( bullet )
+          
+          innocent.life -= 1
+          
+          innocent.retroceso( bullet.angle )
+          
+          if innocent.life <= 0 
+            @hero.score -= 40
+            @explosion.play
+            
+            @innocents.delete innocent
+          end
+          
+          # blood
+          @bloods << Blood.new( self, innocent.x, innocent.y )
+        end
+      end
     end
     
     @zombies.each do |zombie|
-      if Gosu::distance(@hero.x, @hero.y, zombie.x, zombie.y) < 10 then
-        @hero.life -= 1
-        @zombie_eaten.play
+      if zombie.bite <= 0 
+        if Gosu::distance(@hero.x, @hero.y, zombie.x, zombie.y) < 10 then
+          @hero.life -= 1
+          @zombie_eaten.play
+          zombie.bite = Conf::ZOMBIE_BITE_VELOCITY
+        end
+      
+        @innocents.each do |innocent|
+          if Gosu::distance(innocent.x, innocent.y, zombie.x, zombie.y) < 20 then
+            innocent.life -= 1
+          
+            if innocent.life <= 0
+              @aahhh.play
+              @zombies << innocent.convert_to_zombie
+              @innocents.delete innocent
+            else
+              @zombie_eaten.play
+            end
+            
+            zombie.bite = Conf::ZOMBIE_BITE_VELOCITY
+          end
+        end
+      end
+    end
+    
+    @innocents.each do |innocent|
+      if Gosu::distance(@helicopter.x, @helicopter.y, innocent.x, innocent.y) < 40 then
+        @innocents_saved += 1
+        @helicopter_get_an_innocent.play
+        @innocents.delete innocent
       end
     end
   end
@@ -222,15 +315,18 @@ class Game < Gosu::Window
   def draw
     @map.draw
     @hero.draw
+    @helicopter.draw
     @zombies.each { |zombie| zombie.draw }
     @bullets.each { |bullet| bullet.draw }
-    @bloods.each { |blood| blood.draw }    
-
+    @bloods.each { |blood| blood.draw }
+    @innocents.each { |innocent| innocent.draw }
+    
     @font.draw("Score: #{@hero.score}", 10, 10, ZOrder::UI, 1.0, 1.0, 0xffff0000)
     @font.draw("Angle: #{@hero.angle}", 10, 25, ZOrder::UI, 1.0, 1.0, 0xffff0000)
     @font.draw("Bullets: #{@bullets.size}", 10, 40, ZOrder::UI, 1.0, 1.0, 0xffff0000)
     @font.draw("Zombies: #{@zombies.size}", 10, 55, ZOrder::UI, 1.0, 1.0, 0xffff0000)
-    @font.draw("FPS: #{@fps}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    @font.draw("Innocents: #{@innocents.size}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    @font.draw("FPS: #{@fps}", 10, 85, ZOrder::UI, 1.0, 1.0, 0xffff0000)
   end
 
   def button_down(id)

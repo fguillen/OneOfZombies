@@ -15,6 +15,8 @@ class ToolBox
     images[:zombie] = images_array[1]
     images[:bullet] = images_array[2]
     images[:blood] = [ images_array[3], images_array[4], images_array[5] ]
+    images[:innocent] = [ images_array[6], images_array[7] ]
+    images[:helicopter] = images_array[8]
     
     return images
   end

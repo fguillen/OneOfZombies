@@ -31,10 +31,10 @@ class Hero < Sprite
         @y = possible_y
       end
     
-      @x = (@window.map.width*40)   if @x > (@window.map.width*40)
-      @x = 0                        if @x < 0
-      @y = (@window.map.height*40)  if @y > (@window.map.height*40)
-      @y = 0                        if @y < 0
+      @x = (@window.map.width*40) -1    if @x > (@window.map.width*40) - 1
+      @x = 0                            if @x < 0
+      @y = (@window.map.height*40) -1   if @y > (@window.map.height*40) - 1
+      @y = 0                            if @y < 0
       
       # @window.map.tile_in( @x, @y ).visible = true
     end

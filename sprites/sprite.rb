@@ -37,4 +37,17 @@ class Sprite
     
     @image.draw_rot( x, y, @z, angle, 0.5, 0.5, factor_y )
   end
+  
+  def back_position
+    angle = @angle
+    
+    if angle < 225 && angle > 180
+      angle = angle - 180
+    end
+    
+    x = @x + Gosu::offset_x( angle - 180, 40 )
+    y = @y + Gosu::offset_y( angle - 180, 40 )
+    
+    return x, y
+  end
 end
