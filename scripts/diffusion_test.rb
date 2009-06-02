@@ -44,7 +44,7 @@ class DiffusionTest
     
     @tiles = []
     
-    @map.each_with_index do |row, row_index|
+    @map_clean.each_with_index do |row, row_index|
       @tiles[row_index] = []
       row.split( '' ).each_with_index do |value, column_index|
         @tiles[row_index] << Tile.new( row_index, column_index, value )
@@ -127,7 +127,7 @@ class DiffusionTest
     
     if num > 0 # && tile.value == 0
       (tiles_walkables_arround( tile.row, tile.column ) - @touched_tiles).each do |tile_arround|
-        proyect_value_2( tile_arround, num )
+        proyect_value_2( tile_arround, num )  if tile_arround.value < num
       end
     end
     

@@ -11,7 +11,7 @@ class Map
   end
   
   def charge_map
-    map_plain = File.read( 'map_2.txt' )
+    map_plain = File.read( 'map.txt' )
   
     map_plain.split( "\n" ).each_with_index do |row, row_index|
       @tiles[row_index] = []
@@ -114,7 +114,7 @@ class Map
     # @proyected_tiles = []
     
     hero_tile = self.tile_in( @window.hero.x, @window.hero.y )
-    self.proyect_zombie_value( hero_tile, 5 )
+    self.proyect_zombie_value( hero_tile, 4 )
     
     @window.innocents.each do |innocent|
       innocent_tile = self.tile_in( innocent.x, innocent.y )
@@ -123,14 +123,14 @@ class Map
     
     hero_back_postion_x, hero_back_postion_y = @window.hero.back_position
     hero_back_tile = self.tile_in( hero_back_postion_x, hero_back_postion_y )
-    self.proyect_innocent_value( hero_back_tile, 5 )
+    self.proyect_innocent_value( hero_back_tile, 3 )
     
     helicopter_tile = self.tile_in( @window.helicopter.x, @window.helicopter.y )
-    self.proyect_helicopter_value( helicopter_tile, 4 )
+    self.proyect_helicopter_value( helicopter_tile, 3 )
     
     @window.zombies.each do |zombie|
       zombie_tile = self.tile_in( zombie.x, zombie.y )
-      self.proyect_negative_innocent_value( zombie_tile, 3 )
+      self.proyect_negative_innocent_value( zombie_tile, 4 )
     end
     
     
@@ -174,7 +174,7 @@ class Map
     
     if num > 0 # && tile.value == 0
       tiles_walkables_arround( tile.row, tile.column ).each do |tile_arround|
-        proyect_zombie_value( tile_arround, num )
+        proyect_zombie_value( tile_arround, num )  if tile_arround.zombie_value < num
       end
     end
   end
@@ -188,7 +188,7 @@ class Map
     
     if num > 0 # && tile.value == 0
       tiles_walkables_arround( tile.row, tile.column ).each do |tile_arround|
-        proyect_innocent_value( tile_arround, num )
+        proyect_innocent_value( tile_arround, num )  if tile_arround.innocent_value < num
       end
     end
   end
@@ -199,7 +199,7 @@ class Map
     
     if num > 0 # && tile.value == 0
       tiles_walkables_arround( tile.row, tile.column ).each do |tile_arround|
-        proyect_helicopter_value( tile_arround, num )
+        proyect_helicopter_value( tile_arround, num )  if tile_arround.helicopter_value < num
       end
     end
   end
@@ -210,7 +210,7 @@ class Map
     
     if num > 0 # && tile.value == 0
       tiles_walkables_arround( tile.row, tile.column ).each do |tile_arround|
-        proyect_negative_innocent_value( tile_arround, num )
+        proyect_negative_innocent_value( tile_arround, num )  if tile_arround.negative_innocent_value < num
       end
     end
   end

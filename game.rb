@@ -29,10 +29,10 @@ end
 module Conf
   HERO_VELOCITY = 3
   HERO_LIFE = 50
-  BULLET_VELOCITY = 10
+  BULLET_VELOCITY = 15
   BULLET_RETROCESO = 5
   BULLET_LAPSUS = 5
-  ZOMBIE_VELOCITY = 0.8
+  ZOMBIE_VELOCITY = 1
   ZOMBIE_TURN_VELOCITY = 25
   ZOMBIE_TURN_DECISION = 10
   ZOMBIE_LIFE = 5
@@ -99,6 +99,8 @@ class Game < Gosu::Window
     @frames_counter = 0
     
     @innocents_saved = 0
+    
+    @pause = false
   end
   
   def initialize_hero
@@ -158,6 +160,8 @@ class Game < Gosu::Window
   end
 
   def update
+    return  if @pause
+    
     @frames_counter += 1
     if Gosu::milliseconds - @milliseconds_before >= 1000
       @fps = @frames_counter.to_f / ((Gosu::milliseconds - @milliseconds_before) / 1000.0)
@@ -327,11 +331,17 @@ class Game < Gosu::Window
     @font.draw("Zombies: #{@zombies.size}", 10, 55, ZOrder::UI, 1.0, 1.0, 0xffff0000)
     @font.draw("Innocents: #{@innocents.size}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xffff0000)
     @font.draw("FPS: #{@fps}", 10, 85, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    @font.draw("Innocents S: #{@innocents_saved}", 10, 100, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    @font.draw("Pause: #{@pause}", 10, 115, ZOrder::UI, 1.0, 1.0, 0xffff0000)
   end
 
   def button_down(id)
     if id == Gosu::Button::KbEscape then
       close
+    end
+    
+    if id == Gosu::Button::KbP then
+      @pause = !@pause
     end
   end
 end

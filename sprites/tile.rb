@@ -36,11 +36,33 @@ class Tile < Sprite
     super()
   end
 
+  # def draw_inner( x, y )
+  #   super
+  #   @window.font_small.draw("#{@zombie_value}", x, y-10, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+  #   @window.font_small.draw("#{self.total_innocent_value}", x, y, ZOrder::UI, 1.0, 1.0, 0xff00ff00)
+  # end
+  
   def draw_inner( x, y )
-    super
-    # @window.font_small.draw("#{@zombie_value}", x, y-10, ZOrder::UI, 1.0, 1.0, 0xffff0000)
-    # @window.font_small.draw("#{self.total_innocent_value}", x, y, ZOrder::UI, 1.0, 1.0, 0xff00ff00)
-
+    # super
+    
+    @color = Gosu::Color.new(0xff000000)
+    @color.red = 255 * @zombie_value / 8
+    @color.green = (150 * self.total_innocent_value / 14) + 100
+    @color.blue = 0
+    
+    @image.draw(
+      x - @image.width / 2.0, 
+      y - @image.height / 2.0,
+      @z, 
+      1, 
+      1, 
+      @color, 
+      :additive
+    )
+    
+    @window.font_small.draw("#{@zombie_value}", x, y-10, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    @window.font_small.draw("#{self.total_innocent_value}", x, y, ZOrder::UI, 1.0, 1.0, 0xff00ff00)
+  
   end
   
   def total_innocent_value

@@ -94,7 +94,9 @@ class Innocent < Sprite
         @angle += rand( (Conf::ZOMBIE_TURN_VELOCITY * 2) + 1 ) - Conf::ZOMBIE_TURN_VELOCITY
       end
     else
-      @angle = Gosu::angle( @x, @y, tile_to_go.x, tile_to_go.y )
+      if( tile_to_go != @window.map.tile_in( @x, @y ) )
+        @angle = Gosu::angle( @x, @y, tile_to_go.x, tile_to_go.y )
+      end
     end
     
     possible_x = @x + Gosu::offset_x( @angle, @velocity )

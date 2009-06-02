@@ -24,6 +24,8 @@ class Zombie < Sprite
   def more_valuable_arround_tile
     zombie_tile = @window.map.tile_in( @x, @y )
     
+    return nil  if zombie_tile.nil?
+    
     total_tiles = @window.map.tiles_walkables_arround( zombie_tile.row, zombie_tile.column, false )
     total_tiles << zombie_tile
     total_tiles.sort!{ |a,b| b.zombie_value <=> a.zombie_value }
@@ -48,7 +50,9 @@ class Zombie < Sprite
         @angle += rand( (Conf::ZOMBIE_TURN_VELOCITY * 2) + 1 ) - Conf::ZOMBIE_TURN_VELOCITY
       end
     else
-      @angle = Gosu::angle( @x, @y, tile_to_go.x, tile_to_go.y )
+      if( tile_to_go != @window.map.tile_in( @x, @y ) )
+        @angle = Gosu::angle( @x, @y, tile_to_go.x, tile_to_go.y )
+      end
     end
     
     @x += Gosu::offset_x( @angle, @velocity )
