@@ -2,12 +2,12 @@ class SpriteStatus
   
   attr_accessor :name, :animation, :delay
   
-  def initialize( name, animation, delay )
+  def initialize( name, images, delay )
     @name = name
-    @animation = animation
+    @images = images
     @delay = delay
     @actual_delay = @delay
-    @actual_image = animation.next
+    @step = 0
   end
   
   def image
@@ -15,9 +15,10 @@ class SpriteStatus
     
     if @actual_delay <= 0
       @actual_delay = delay
-      @actual_image = animation.next
+      @step += 1
+      # @step = 0  if @step > @images.size
     end
     
-    return @actual_image.image
+    return @images[@step % @images.size]
   end
 end

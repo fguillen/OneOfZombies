@@ -24,8 +24,7 @@ class Innocent < Sprite
       ]
     end
     
-    @animation = Animation.new( images ) 
-    @status = SpriteStatus.new( :walking, @animation, 2 )
+    @status = SpriteStatus.new( :walking, images, 2 )
     @image = @status.image
     super() 
   end

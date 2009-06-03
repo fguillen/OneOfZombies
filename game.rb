@@ -19,9 +19,6 @@ require 'sprites/helicopter'
 require 'sprites/innocent'
 require 'sprites/tile'
 
-
-
-
 module ZOrder
   Background = 0
   Blood = 1
