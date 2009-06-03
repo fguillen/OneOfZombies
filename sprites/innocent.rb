@@ -1,4 +1,5 @@
 class Innocent < Sprite
+  
   attr_reader :x, :y
   attr_accessor :life
   
@@ -7,51 +8,31 @@ class Innocent < Sprite
     @angle = rand( (360 * 2) + 1 ) - 360 
     @life = rand(Conf::INNOCENT_LIFE) + 1
     @window = window
-    @image = @window.tb.sprite_images[:innocent][rand(@window.tb.sprite_images[:innocent].size)]
     @z = ZOrder::Hero
     @velocity = rand() * Conf::INNOCENT_VELOCITY
     
+    images = nil
+    if( rand < 0.5 )
+      images = [
+        @window.tb.sprite_images[:innocent1_walking][0],
+        @window.tb.sprite_images[:innocent1_walking][1]
+      ]
+    else
+      images = [
+        @window.tb.sprite_images[:innocent2_walking][0],
+        @window.tb.sprite_images[:innocent2_walking][1]
+      ]
+    end
+    
+    @animation = Animation.new( images ) 
+    @status = SpriteStatus.new( :walking, @animation, 2 )
+    @image = @status.image
     super() 
   end
 
   def warp(x, y)
     @x = x
     @y = y
-  end
-  
-  def move
-    
-    if self.see_hero?
-      x, y = self.hero_back_position
-      @angle = Gosu::angle(@x, @y, x, y)
-    else
-      if rand(Conf::ZOMBIE_TURN_DECISION) == 0
-        @angle += rand( (Conf::ZOMBIE_TURN_VELOCITY * 2) + 1 ) - Conf::ZOMBIE_TURN_VELOCITY
-      end
-    end
-      
-    possible_x = @x + Gosu::offset_x( @angle, @velocity )
-    possible_y = @y + Gosu::offset_y( @angle, @velocity )
-    
-    if !@window.map.any_touched_tile_is_not?( :walkable, possible_x, possible_y, @width/3, @height/3 )
-      @x = possible_x
-      @y = possible_y
-    end
-    
-    @x = (@window.map.width*40) -1    if @x > (@window.map.width*40) - 1
-    @x = 0                            if @x < 0
-    @y = (@window.map.height*40) -1   if @y > (@window.map.height*40) - 1
-    @y = 0                            if @y < 0
-    
-    # se da la vuelta
-    if(
-      @x > (@window.map.width * 40) ||
-      @x < 0 ||
-      @y > (@window.map.height * 40) ||
-      @y < 0
-    ) 
-      @angle += 90
-    end
   end
   
   def retroceso( angle )
@@ -87,6 +68,8 @@ class Innocent < Sprite
   end
 
   def move
+    @image = @status.image
+    
     tile_to_go = self.more_valuable_arround_tile
     
     if tile_to_go.nil?

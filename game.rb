@@ -5,8 +5,11 @@ end
 
 require 'gosu'
 
+require 'animation'
 require 'tool_box'
 require 'map'
+
+require 'sprite_status'
 require 'sprites/sprite'
 require 'sprites/blood'
 require 'sprites/bullet'

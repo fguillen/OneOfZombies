@@ -55,8 +55,13 @@ class Zombie < Sprite
       end
     end
     
-    @x += Gosu::offset_x( @angle, @velocity )
-    @y += Gosu::offset_y( @angle, @velocity )
+    possible_x = @x + Gosu::offset_x( @angle, @velocity )
+    possible_y = @y + Gosu::offset_y( @angle, @velocity )
+    
+    if !@window.map.any_touched_tile_is_not?( :walkable, possible_x, possible_y, @width/3, @height/3 )
+      @x = possible_x
+      @y = possible_y
+    end
     
     @x = (@window.map.width*40) -1    if @x > (@window.map.width*40) - 1
     @x = 0                            if @x < 0

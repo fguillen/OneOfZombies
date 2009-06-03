@@ -14,12 +14,14 @@ class ToolBox
     images[:hero] = images_array[0]
     images[:zombie] = images_array[1]
     images[:bullet] = images_array[2]
-    images[:blood] = [ images_array[3], images_array[4], images_array[5] ]
-    images[:innocent] = [ images_array[6], images_array[7] ]
-    images[:helicopter] = images_array[8]
+    images[:blood] = [ images_array[6], images_array[7], images_array[8] ]
+    images[:innocent1_walking] = [ images_array[12], images_array[13] ]
+    images[:innocent2_walking] = [ images_array[14], images_array[15] ]
+    images[:helicopter] = images_array[16]
     
     return images
   end
+
   
   def charge_tiles_images
     images_array = Gosu::Image::load_tiles(@window, "media/map_tiles.png", 40, 40, false)
