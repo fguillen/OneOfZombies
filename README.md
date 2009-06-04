@@ -10,16 +10,16 @@ Of course you can use the firearm you taken from the your father's died fingers.
 
 ## Keys
 
-* G: take off of the helicopter
-* Space: kill kill
-* Cursor Keys: run run
-* S: Pause
+* **G**: take off of the helicopter
+* **Space**: kill kill
+* **Cursor Keys**: run run
+* **S**: Pause
 
 ## Special Keys
 
 This is just for debugging
 
-* P: Show/hidden panel
-* I: Show/hidden tiles vibration values
-* L: Show/hidden the life of all criatures
+* **P**: Show/hidden panel
+* **I**: Show/hidden tiles vibration values
+* **L**: Show/hidden the life of all criatures
 
