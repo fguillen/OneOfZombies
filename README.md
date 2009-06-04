@@ -6,6 +6,13 @@ Very beta version.. it is not time for report bugs :)
 
 Put your speakers low.. the sounds are not very pleasant.
 
+No good frame rate with ruby 1.8.. better with ruby 1.9
+
+
+## Dowloads
+
+Look the downloads section: [http://github.com/fguillen/OneOfZombies/downloads]
+
 ## Instructions
 
 Oh dammit, they are there.. only you has what supposes to have to go there, a fifteen years old girl.. 
