@@ -1,5 +1,9 @@
 # One Of Zombies
 
+## Diclaimer
+
+Very beta version.. it is not time for report bugs :)
+
 ## Instructions
 
 Oh dammit, they are there.. only you has what supposes to have to go there, a fifteen years old girl.. 
