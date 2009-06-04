@@ -19,7 +19,7 @@ Of course you can use the firearm you taken from the your father's died fingers.
 
 This is just for debugging
 
-* **P**: Show/hidden panel
-* **I**: Show/hidden tiles vibration values
-* **L**: Show/hidden the life of all criatures
+* **P**: Show/hide panel
+* **I**: Show/hide tiles vibration values
+* **L**: Show/hide the life of all criatures
 
