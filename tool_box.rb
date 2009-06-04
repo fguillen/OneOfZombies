@@ -11,13 +11,13 @@ class ToolBox
     images_array = Gosu::Image::load_tiles(@window, "media/sprite_tiles.png", 40, 40, false)
 
     images = {}
-    images[:hero] = images_array[0]
-    images[:zombie] = images_array[1]
-    images[:bullet] = images_array[2]
+    images[:hero] = [ images_array[0], images_array[1] ]
+    images[:zombie] = [ images_array[2], images_array[3] ]
+    images[:bullet] = images_array[4]
     images[:blood] = [ images_array[6], images_array[7], images_array[8] ]
     images[:innocent1_walking] = [ images_array[12], images_array[13] ]
     images[:innocent2_walking] = [ images_array[14], images_array[15] ]
-    images[:helicopter] = images_array[16]
+    images[:helicopter] = [ images_array[16], images_array[17] ]
     
     return images
   end

@@ -33,8 +33,17 @@ class Map
   
   
   def update_coordinates
-    @x = @window.hero.x - (Conf::SCREEN_WIDTH/2)
-    @y = @window.hero.y - (Conf::SCREEN_HEIGHT/2)
+    
+    reference_element = nil
+    
+    if( @window.helicopter.status_name != 'inspection' && @window.helicopter.status_name != 'comming' )
+      reference_element = @window.hero
+    else
+      reference_element = @window.helicopter
+    end
+    
+    @x = reference_element.x - (Conf::SCREEN_WIDTH/2)
+    @y = reference_element.y - (Conf::SCREEN_HEIGHT/2)
     
     @x = 0  if @x < 0
     @y = 0  if @y < 0
@@ -113,17 +122,21 @@ class Map
     
     # @proyected_tiles = []
     
-    hero_tile = self.tile_in( @window.hero.x, @window.hero.y )
-    self.proyect_zombie_value( hero_tile, 4 )
+    if( @window.hero.status_name != 'died' )
+      hero_tile = self.tile_in( @window.hero.x, @window.hero.y )
+      self.proyect_zombie_value( hero_tile, 4 )
+      
+      hero_back_postion_x, hero_back_postion_y = @window.hero.back_position
+      hero_back_tile = self.tile_in( hero_back_postion_x, hero_back_postion_y )
+      self.proyect_innocent_value( hero_back_tile, 3 )
+    end 
     
     @window.innocents.each do |innocent|
       innocent_tile = self.tile_in( innocent.x, innocent.y )
       self.proyect_zombie_value( innocent_tile, 4 )
     end
     
-    hero_back_postion_x, hero_back_postion_y = @window.hero.back_position
-    hero_back_tile = self.tile_in( hero_back_postion_x, hero_back_postion_y )
-    self.proyect_innocent_value( hero_back_tile, 3 )
+
     
     helicopter_tile = self.tile_in( @window.helicopter.x, @window.helicopter.y )
     self.proyect_helicopter_value( helicopter_tile, 3 )
@@ -169,6 +182,8 @@ class Map
   # end
   
   def proyect_zombie_value( tile, num )
+    return nil  if tile.nil?
+    
     tile.zombie_value = num  if num > tile.zombie_value
     num = num - 1
     
@@ -194,6 +209,8 @@ class Map
   end
   
   def proyect_helicopter_value( tile, num )
+    return nil   if tile.nil?
+    
     tile.helicopter_value = num  if num > tile.helicopter_value
     num = num - 1
     
@@ -241,6 +258,18 @@ class Map
     else
       return nil
     end
+  end
+  
+  def random_walkable_tile
+    tile = nil
+    
+    begin
+      column = rand( @width ).to_i
+      row = rand( @height ).to_i
+      tile = @tiles[row][column]
+    end while( !tile.walkable )
+    
+    return tile
   end
 
 end

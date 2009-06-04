@@ -1,9 +1,8 @@
 class SpriteStatus
   
-  attr_accessor :name, :animation, :delay
+  attr_accessor :animation, :delay
   
-  def initialize( name, images, delay )
-    @name = name
+  def initialize( images, delay )
     @images = images
     @delay = delay
     @actual_delay = @delay

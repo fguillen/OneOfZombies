@@ -13,18 +13,12 @@ class Innocent < Sprite
     
     images = nil
     if( rand < 0.5 )
-      images = [
-        @window.tb.sprite_images[:innocent1_walking][0],
-        @window.tb.sprite_images[:innocent1_walking][1]
-      ]
+      images = @window.tb.sprite_images[:innocent1_walking]
     else
-      images = [
-        @window.tb.sprite_images[:innocent2_walking][0],
-        @window.tb.sprite_images[:innocent2_walking][1]
-      ]
+      images = @window.tb.sprite_images[:innocent2_walking]
     end
     
-    @status = SpriteStatus.new( :walking, images, 2 )
+    @status = SpriteStatus.new( images, Conf::ANIMATION_VELOCITY )
     @image = @status.image
     super() 
   end
@@ -47,7 +41,9 @@ class Innocent < Sprite
   
   def draw_inner( x, y )
     super
-    @window.font.draw("#{life}", x - 20 , y - 30 , @z, 1.0, 1.0, 0xffff0000)
+    if( @window.admin.admin_show_life )
+      @window.font.draw("#{life}", x - 20 , y - 30 , @z, 1.0, 1.0, 0xffff0000)
+    end
   end
   
   def more_valuable_arround_tile
@@ -89,10 +85,10 @@ class Innocent < Sprite
       @y = possible_y
     end
     
-    @x = (@window.map.width*40) -1    if @x > (@window.map.width*40) - 1
-    @x = 0                            if @x < 0
-    @y = (@window.map.height*40) -1   if @y > (@window.map.height*40) - 1
-    @y = 0                            if @y < 0
+    @x = (@window.map.width*40) - 20    if @x > (@window.map.width*40) - 20
+    @x = 0                              if @x < 0
+    @y = (@window.map.height*40) - 20   if @y > (@window.map.height*40) - 20
+    @y = 0                              if @y < 0
   end
   
   # def move

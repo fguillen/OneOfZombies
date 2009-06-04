@@ -8,6 +8,7 @@ require 'gosu'
 require 'animation'
 require 'tool_box'
 require 'map'
+require 'panel'
 
 require 'sprite_status'
 require 'sprites/sprite'
@@ -23,12 +24,13 @@ module ZOrder
   Background = 0
   Blood = 1
   Hero = 2
-  UI = 3
+  Helicopter = 3
+  UI = 4
 end
 
 module Conf
   HERO_VELOCITY = 3
-  HERO_LIFE = 50
+  HERO_LIFE = 5
   BULLET_VELOCITY = 15
   BULLET_RETROCESO = 5
   BULLET_LAPSUS = 5
@@ -39,13 +41,29 @@ module Conf
   ZOMBIE_SAW = 200
   ZOMBIE_REPRODUCTION = 100
   ZOMBIE_BITE_VELOCITY = 10 
-  NUM_ZOMBIES = 20
-  SCREEN_WIDTH = 600
-  SCREEN_HEIGHT = 400
-  INNOCENT_LIFE = 4
-  INNOCENT_VELOCITY = HERO_VELOCITY 
+  NUM_ZOMBIES = 40
+  SCREEN_WIDTH = 800
+  SCREEN_HEIGHT = 500
+  PANEL_WIDTH = 200
+  PANEL_VELOCITY = 2
+  INNOCENT_LIFE = 8
+  INNOCENT_VELOCITY = 5
   INNOCENT_SAW = 200
-  NUM_INNOCENTS = 30
+  NUM_INNOCENTS = 10
+  HELICOPTER_CAPACITY = 4
+  HELICOPTER_VELOCITY = 5
+  HELICOPTER_DELIVERING_TIME = 400
+  ANIMATION_VELOCITY = 4
+end
+
+class Admin
+  attr_accessor :admin_show_info, :admin_show_panel, :admin_show_life
+  
+  def initialize
+    @admin_show_info = false
+    @admin_show_panel = false
+    @admin_show_life = false
+  end
 end
 
 
@@ -57,13 +75,13 @@ end
 
 
 class Game < Gosu::Window
-  attr_accessor :bullets
+  attr_accessor :bullets, :admin
   attr_reader :font, :font_small, :hero, :image_zombie, :image_bullet, :tb, :map, :innocents, :zombies
-  attr_reader :helicopter
+  attr_reader :helicopter, :panel
   
   
   def initialize
-    super(Conf::SCREEN_WIDTH, Conf::SCREEN_HEIGHT, false)
+    super( Conf::SCREEN_WIDTH, Conf::SCREEN_HEIGHT, false, 30 )
     self.caption = "One Of Zombies Game"
     
     @bullet_lapsus = 0
@@ -101,6 +119,15 @@ class Game < Gosu::Window
     @innocents_saved = 0
     
     @pause = false
+    
+    @admin = Admin.new
+    
+    @panel = Panel.new( self )
+    
+    @panel.add_message( "what the fuck!!" )
+    @panel.add_message( "that is all full of that criatures" )
+    @panel.add_message( "" )
+    @panel.add_message( "helicopter: when you ready press 'G' key and I'll put you on flat" )
   end
   
   def initialize_hero
@@ -116,11 +143,7 @@ class Game < Gosu::Window
   
   def initialize_helicopter
     helicopter = Helicopter.new(self)
-    helicopter.warp( (Conf::SCREEN_WIDTH / 2) , (Conf::SCREEN_HEIGHT / 2) )
-    
-    while( self.map.any_touched_tile_is_not?( :walkable, helicopter.x, helicopter.y, helicopter.width, helicopter.height ) ) do
-      helicopter.warp( rand(self.map.width*40), rand(self.map.height*40) )
-    end
+    helicopter.warp( ((@map.width * 40) + 100) , (@map.height * 20) )
     
     return helicopter
   end
@@ -171,63 +194,70 @@ class Game < Gosu::Window
     
     @bullet_lapsus -= 1  if @bullet_lapsus > 0
     
-    if button_down? Gosu::Button::KbUp then
-      @hero.angle = 0.0
-    end
     
-    if button_down? Gosu::Button::KbDown then
-      @hero.angle = 180.0
-    end
+    if( @hero.status_name != 'helicopter' && @hero.status_name != 'died' )
+      if button_down? Gosu::Button::KbUp then
+        @hero.angle = 0.0
+      end
     
-    if button_down? Gosu::Button::KbLeft then
-      @hero.angle = 270.0
-    end
+      if button_down? Gosu::Button::KbDown then
+        @hero.angle = 180.0
+      end
     
-    if button_down? Gosu::Button::KbRight then
-      @hero.angle = 90.0
-    end
+      if button_down? Gosu::Button::KbLeft then
+        @hero.angle = 270.0
+      end
     
-    if button_down?( Gosu::Button::KbRight ) && button_down?( Gosu::Button::KbDown )
-      @hero.angle = 135.0
-    end
+      if button_down? Gosu::Button::KbRight then
+        @hero.angle = 90.0
+      end
     
-    if button_down?( Gosu::Button::KbRight ) && button_down?( Gosu::Button::KbUp )
-      @hero.angle = 45.0
-    end
+      if button_down?( Gosu::Button::KbRight ) && button_down?( Gosu::Button::KbDown )
+        @hero.angle = 135.0
+      end
     
-    if button_down?( Gosu::Button::KbLeft ) && button_down?( Gosu::Button::KbDown )
-      @hero.angle = 225.0
-    end
+      if button_down?( Gosu::Button::KbRight ) && button_down?( Gosu::Button::KbUp )
+        @hero.angle = 45.0
+      end
     
-    if button_down?( Gosu::Button::KbLeft ) && button_down?( Gosu::Button::KbUp )
-      @hero.angle = 315.0
-    end
+      if button_down?( Gosu::Button::KbLeft ) && button_down?( Gosu::Button::KbDown )
+        @hero.angle = 225.0
+      end
     
-    if(
-      button_down?( Gosu::Button::KbRight ) ||
-      button_down?( Gosu::Button::KbLeft ) ||
-      button_down?( Gosu::Button::KbDown ) ||
-      button_down?( Gosu::Button::KbUp )
-    )
-      @hero.walking = true
-    else
-      @hero.walking = false
-    end
+      if button_down?( Gosu::Button::KbLeft ) && button_down?( Gosu::Button::KbUp )
+        @hero.angle = 315.0
+      end
     
-    if( (button_down? Gosu::Button::KbSpace) && (@bullet_lapsus == 0) )
-      @shoot.play
-      bullet = Bullet.new( self )
-      bullet.warp( @hero.x, @hero.y )
-      bullet.shoot( @hero.angle )
-      @bullets << bullet
-      @bullet_lapsus = Conf::BULLET_LAPSUS
+      if(
+        button_down?( Gosu::Button::KbRight ) ||
+        button_down?( Gosu::Button::KbLeft ) ||
+        button_down?( Gosu::Button::KbDown ) ||
+        button_down?( Gosu::Button::KbUp )
+      )
+        @hero.status = @hero.statuses[:walking]
+      else
+        @hero.status = @hero.statuses[:stop]
+      end
+    
+      if( (button_down? Gosu::Button::KbSpace) && (@bullet_lapsus == 0) )
+        @shoot.play
+        bullet = Bullet.new( self )
+        bullet.warp( @hero.x, @hero.y )
+        bullet.shoot( @hero.angle )
+        @bullets << bullet
+        @bullet_lapsus = Conf::BULLET_LAPSUS
+      end
     end
+
+
     
     @hero.move
     @zombies.each { |zombie| zombie.move }
     @bullets.each { |bullet| bullet.move }
     @innocents.each { |innocent| innocent.move }
+    @helicopter.move
     @map.update
+    @panel.move
     
     # @zombies += initialize_zombies( rand(3) )  if rand(Conf::ZOMBIE_REPRODUCTION) == 0
     
@@ -251,6 +281,8 @@ class Game < Gosu::Window
             @explosion.play
             
             @zombies.delete zombie
+            
+            @panel.add_message 'die zombie, hahaha'
           end
           
           # blood
@@ -273,6 +305,14 @@ class Game < Gosu::Window
             @explosion.play
             
             @innocents.delete innocent
+            
+            @panel.add_message 'ouh, fuck!, I just killed an innocent.'
+            
+            if @innocents.size == 0 
+              @panel.add_message 'that was the last innocent, better go away, come on to the helicopter.'
+            else
+              @panel.add_message "only #{@innocents.size} innocents left"
+            end
           end
           
           # blood
@@ -283,10 +323,28 @@ class Game < Gosu::Window
     
     @zombies.each do |zombie|
       if zombie.bite <= 0 
-        if Gosu::distance(@hero.x, @hero.y, zombie.x, zombie.y) < 10 then
-          @hero.life -= 1
-          @zombie_eaten.play
-          zombie.bite = Conf::ZOMBIE_BITE_VELOCITY
+        zombie.bite = Conf::ZOMBIE_BITE_VELOCITY
+        
+        if( (@hero.status_name == 'stop' || @hero.status_name == 'walking') && @hero.status_name != 'died' )
+          if Gosu::distance(@hero.x, @hero.y, zombie.x, zombie.y) < 10 then
+            @hero.life -= 1
+            
+            if @hero.life <= 0
+              @aahhh.play
+              @panel.add_message 'son or latter, it should happend.. I\'m a zombie'
+              @panel.add_message ''
+              @panel.add_message ''
+              @panel.add_message ''
+              @panel.add_message 'GAME OVER'
+              
+              @hero = hero.convert_to_zombie
+              @zombies << @hero
+            else
+              @zombie_eaten.play
+              @panel.add_message 'he is bitting me!!'
+            end
+            
+          end
         end
       
         @innocents.each do |innocent|
@@ -297,21 +355,64 @@ class Game < Gosu::Window
               @aahhh.play
               @zombies << innocent.convert_to_zombie
               @innocents.delete innocent
+              
+              @panel.add_message 'oh my good, a new zombie'
+              
+              if @innocents.size == 0 
+                @panel.add_message 'the last innocent was infected, better go away, come on to the helicopter.'
+              else
+                @panel.add_message "only #{@innocents.size} innocents left"
+              end
+              
             else
               @zombie_eaten.play
             end
             
-            zombie.bite = Conf::ZOMBIE_BITE_VELOCITY
           end
         end
       end
     end
     
-    @innocents.each do |innocent|
-      if Gosu::distance(@helicopter.x, @helicopter.y, innocent.x, innocent.y) < 40 then
-        @innocents_saved += 1
-        @helicopter_get_an_innocent.play
-        @innocents.delete innocent
+    if( @helicopter.status == @helicopter.statuses[:waiting] )
+      @innocents.each do |innocent|
+        if Gosu::distance(@helicopter.x, @helicopter.y, innocent.x, innocent.y) < 30 then
+          @innocents_saved += 1
+          @helicopter_get_an_innocent.play
+          @innocents.delete innocent
+          
+          @helicopter.innocents_aboard += 1
+          
+          @panel.add_message 'that is, an other innocent on the helicopter'
+          
+          if @innocents.size == 0 
+            @panel.add_message 'no more innocents to save, better go away, come on to the helicopter.'
+          else
+            @panel.add_message "only #{@innocents.size} innocents left"
+          end
+          
+          if( @helicopter.innocents_aboard >= Conf::HELICOPTER_CAPACITY )
+            @helicopter.status = @helicopter.statuses[:going ]
+            
+            @panel.add_message 'put the innocents at save, and come quickly'
+            
+          else
+            @panel.add_message "helicopter: I have space for #{Conf::HELICOPTER_CAPACITY - @helicopter.innocents_aboard} innocents more"
+          end
+        end
+      end
+
+    end
+    
+    if( @helicopter.status == @helicopter.statuses[:waiting] )  
+      if( @innocents.size == 0 )
+        if Gosu::distance(@helicopter.x, @helicopter.y, @hero.x, @hero.y) < 5 then
+          @helicopter_get_an_innocent.play
+          @hero.status = @hero.statuses[:helicopter]
+          @helicopter.status = @helicopter.statuses[:going ]
+          
+          @panel.add_message 'that is all, no more innocents to save'
+          
+        end
       end
     end
   end
@@ -324,15 +425,20 @@ class Game < Gosu::Window
     @bullets.each { |bullet| bullet.draw }
     @bloods.each { |blood| blood.draw }
     @innocents.each { |innocent| innocent.draw }
+    @panel.draw
     
-    @font.draw("Score: #{@hero.score}", 10, 10, ZOrder::UI, 1.0, 1.0, 0xffff0000)
-    @font.draw("Angle: #{@hero.angle}", 10, 25, ZOrder::UI, 1.0, 1.0, 0xffff0000)
-    @font.draw("Bullets: #{@bullets.size}", 10, 40, ZOrder::UI, 1.0, 1.0, 0xffff0000)
-    @font.draw("Zombies: #{@zombies.size}", 10, 55, ZOrder::UI, 1.0, 1.0, 0xffff0000)
-    @font.draw("Innocents: #{@innocents.size}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xffff0000)
-    @font.draw("FPS: #{@fps}", 10, 85, ZOrder::UI, 1.0, 1.0, 0xffff0000)
-    @font.draw("Innocents S: #{@innocents_saved}", 10, 100, ZOrder::UI, 1.0, 1.0, 0xffff0000)
-    @font.draw("Pause: #{@pause}", 10, 115, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    if( @admin.admin_show_panel )
+      @font.draw("Score: #{@hero.score}", 10, 10, ZOrder::UI, 1.0, 1.0, 0xffff0000)  if @hero.status_name != 'died'
+      @font.draw("Angle: #{@hero.angle}", 10, 25, ZOrder::UI, 1.0, 1.0, 0xffff0000)  if @hero.status_name != 'died'
+      @font.draw("Bullets: #{@bullets.size}", 10, 40, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+      @font.draw("Zombies: #{@zombies.size}", 10, 55, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+      @font.draw("Innocents: #{@innocents.size}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+      @font.draw("FPS: #{@fps}", 10, 85, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+      @font.draw("Innocents S: #{@innocents_saved}", 10, 100, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+      @font.draw("Pause: #{@pause}", 10, 115, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+      @font.draw("Helicopter: #{@helicopter.status_name}", 10, 130, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+      @font.draw("Hero: #{@hero.status_name}", 10, 145, ZOrder::UI, 1.0, 1.0, 0xffff0000)
+    end
   end
 
   def button_down(id)
@@ -340,8 +446,37 @@ class Game < Gosu::Window
       close
     end
     
-    if id == Gosu::Button::KbP then
+    if id == Gosu::Button::KbS then
       @pause = !@pause
+    end
+    
+    if id == Gosu::Button::KbI then
+      @admin.admin_show_info = !@admin.admin_show_info
+      
+      @panel.add_message 'show me the ground vibrations'  if @admin.admin_show_info
+      @panel.add_message 'hide me the ground vibrations'  if !@admin.admin_show_info
+    end
+
+    if id == Gosu::Button::KbP then
+      @admin.admin_show_panel = !@admin.admin_show_panel
+      @panel.add_message 'show me the panel'  if @admin.admin_show_panel
+      @panel.add_message 'hide me the panel'  if !@admin.admin_show_panel
+    end
+    
+    if id == Gosu::Button::KbL then
+      @admin.admin_show_life = !@admin.admin_show_life
+      @panel.add_message 'show me the life of the criatures'  if @admin.admin_show_life
+      @panel.add_message 'hide me the life of the criatures'  if !@admin.admin_show_life
+    end
+    
+    
+    if( @hero.status_name == 'helicopter' && id == Gosu::Button::KbG )
+      @helicopter.status = @helicopter.statuses[:comming]
+      @helicopter.tile_destination = self.map.random_walkable_tile
+      @helicopter.angle = Gosu::angle( @helicopter.x, @helicopter.y, @helicopter.tile_destination.x, @helicopter.tile_destination.y )
+      
+      @panel.add_message 'ok, find a place and let me rock'
+      
     end
   end
 end

@@ -7,11 +7,11 @@ class Zombie < Sprite
     @angle = rand( (360 * 2) + 1 ) - 360 
     @life = rand(Conf::ZOMBIE_LIFE) + 1
     @window = window
-    @image = @window.tb.sprite_images[:zombie]
     @z = ZOrder::Hero
     @velocity = rand() * Conf::ZOMBIE_VELOCITY
     @bite = Conf::ZOMBIE_BITE_VELOCITY
-    
+    @status = SpriteStatus.new( @window.tb.sprite_images[:zombie], Conf::ANIMATION_VELOCITY )
+    @image = @status.image
     super() 
   end
 
@@ -40,6 +40,8 @@ class Zombie < Sprite
   end
 
   def move
+    @image = @status.image
+    
     @bite -= 1  if @bite > 0
     
     
@@ -108,7 +110,13 @@ class Zombie < Sprite
   
   def draw_inner( x, y )
     super
-    @window.font.draw("#{life}", x - 20 , y - 30 , @z, 1.0, 1.0, 0xffff0000)
+    if( @window.admin.admin_show_life )
+      @window.font.draw("#{life}", x - 20 , y - 30 , @z, 1.0, 1.0, 0xffff0000)
+    end
+  end
+  
+  def status_name
+    return 'died'
   end
 
 end
