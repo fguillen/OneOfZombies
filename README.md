@@ -11,7 +11,7 @@ No good frame rate with ruby 1.8.. better with ruby 1.9
 
 ## Dowloads
 
-Look the downloads section: [http://github.com/fguillen/OneOfZombies/downloads]
+Look the [downloads section](http://github.com/fguillen/OneOfZombies/downloads "Download Section")
 
 ## Instructions
 
