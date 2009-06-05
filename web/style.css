@@ -1,0 +1,331 @@
+/*  
+Theme Name: Unnamed
+Theme URI: http://www.freewpthemes.net/preview/unnamed
+Description: Widget ready and tested on WP 2.2+.
+Version: 2.0
+Author: Free WordPress Themes
+Author URI: http://www.freewpthemes.net/
+*/
+
+body {
+  margin-top: 20px;
+  padding: 0;
+  background: #1F1F1F;
+  font-size: 13px;
+  text-align: justify;
+  color: #5C5116;
+}
+
+body, th, td, input, textarea, select, option {
+  font-family: Arial, Times, serif;
+}
+
+h1, h2, h3 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: normal;
+  color: #819CDB;
+}
+
+h1 {
+  font-size: 36px;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1em;
+}
+
+p, ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  line-height: 200%;
+}
+
+blockquote {
+  padding-left: 1em;
+}
+
+blockquote p, blockquote ul, blockquote ol {
+  line-height: normal;
+  font-style: italic;
+}
+
+a {
+  color: #413C20;
+}
+
+a:hover {
+}
+
+hr {
+  display: none;
+}
+
+/* Header */
+
+#header {
+  width: 800px;
+  height: 270px;
+  margin: 0 auto;
+  background: url(images/img01.jpg) no-repeat left top;
+}
+
+#header h1, #header p {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#header h1 {
+  color: #FFFFFF;
+  font-size: 50px;
+  padding: 20px 0 0 60px;
+}
+
+#header span {
+  color: #ed242c;
+}
+
+#header p {
+  margin-top: -5px;
+  padding-left: 70px;
+  font-size: 13px;
+  color: #FFFFFF;
+}
+
+#header a {
+  text-decoration: none;
+  color: #FFB71C;
+}
+
+/* Page */
+
+#page {
+  width: 800px;
+  margin: 0 auto;
+  background: #FFFFFF url(images/img03.jpg) repeat-y left top;
+}
+
+#page-bgtop {
+  background: url(images/img02.jpg) no-repeat left top;
+}
+
+#page-bgbtm {
+  padding: 20px 30px;
+  background: url(images/img04.jpg) no-repeat left bottom;
+}
+
+/* Content */
+
+#content {
+  float: right;
+  width: 500px;
+  padding-top: 170px;
+  margin-bottom: 30px;
+}
+
+.post {
+  padding: 0px 0px 0 0px;
+}
+
+.title {
+  margin: 0;
+  padding-bottom: 5px;
+  font-size: 24px;
+  color: #3B3513;
+}
+
+.title a {
+  text-decoration: none;
+  color: #3B3513;
+}
+
+.pagetitle {
+  border-bottom: 2px solid #0F0F0F;
+}
+
+.byline {
+  margin: -10px 0px 0px 0px;
+  border-bottom: 1px solid #CCCCCC;
+  color: #646464;
+}
+
+.meta {
+  text-align: left;
+  color: #646464;
+  padding: 10px 10px;
+  margin: 30px 0;
+  text-transform: uppercase;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+}
+
+.meta .more {
+  padding-left: 10px;
+}
+
+.meta .comments {
+  padding-left: 10px;
+}
+.meta a {
+}
+
+.entry {
+  padding: 30px 0px;
+}
+
+.navigation {
+}
+
+.alignleft {
+  float: left;
+}
+
+.alignright {
+  float: right;
+}
+
+.posts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  line-height: normal;
+}
+
+.posts li {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #0F0F0F;
+}
+
+.posts h3 {
+  margin: 0;
+  font-weight: bold;
+}
+
+.posts p {
+  margin: 0;
+  line-height: normal;
+}
+
+.posts a {
+}
+
+/* Sidebar */
+
+#sidebar {
+  float: left;
+  width: 200px;
+  margin-top: -80px;
+  padding-top: 50px;
+  color: #B57969;
+}
+
+#sidebar ul {
+  margin: 60px 0px 0px 0px;
+  list-style: none;
+}
+
+#sidebar li {
+}
+
+#sidebar li ul {
+  margin-bottom: 40px;
+}
+
+#sidebar li li {
+  border-bottom: 1px solid #FFFFFF;
+  padding: 5px 15px;
+}
+
+#sidebar h2 {
+  margin: 0;
+  height: 35px;
+  padding: 8px 0px 10px 15px;
+  font-size: 18px;
+  color: #FFE7E0;
+}
+
+#sidebar h2 a {
+}
+
+#sidebar a {
+  text-decoration: none;
+  color: #E5DDAD;
+}
+
+#sidebar a:hover {
+  text-decoration: none;
+}
+
+/* Search */
+
+#search input {
+  display: none;
+}
+
+#search input#s {
+  display: block;
+  width: 230px;
+  padding: 2px 5px;
+  border: 1px solid #3DD1FF;
+}
+
+#search br {
+  display: none;
+}
+
+/* Calendar */
+
+#calendar {
+}
+
+#calendar h2 {
+  margin-bottom: 15px;
+}
+
+#calendar table {
+  width: 80%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+#calendar caption {
+  width: 100%;
+  text-align: center;
+}
+
+#next {
+  text-align: right;
+}
+
+#prev {
+  text-align: left;
+}
+
+/* Footer */
+
+#footer {
+  clear: both;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-size: smaller;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #B57969;
+}
+
+#footer p {
+  margin: 0;
+  padding: 20px 0px;
+  text-transform: uppercase;
+}
+
+#footer p a {
+  color: #FFFFFF;
+}
+
