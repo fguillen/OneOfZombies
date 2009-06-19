@@ -8,7 +8,7 @@ class ToolBox
   end
   
   def charge_sprite_images
-    images_array = Gosu::Image::load_tiles(@window, "media/sprite_tiles.png", 40, 40, false)
+    images_array = Gosu::Image::load_tiles(@window, "#{File.dirname(__FILE__)}/media/sprite_tiles.png", 40, 40, false)
 
     images = {}
     images[:hero] = [ images_array[0], images_array[1] ]
@@ -24,7 +24,7 @@ class ToolBox
 
   
   def charge_tiles_images
-    images_array = Gosu::Image::load_tiles(@window, "media/map_tiles.png", 40, 40, false)
+    images_array = Gosu::Image::load_tiles(@window, "#{File.dirname(__FILE__)}/media/map_tiles.png", 40, 40, false)
 
     images = {}
     images[:tree] = images_array[0]

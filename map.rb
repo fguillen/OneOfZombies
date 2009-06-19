@@ -11,7 +11,7 @@ class Map
   end
   
   def charge_map
-    map_plain = File.read( 'map_2.txt' )
+    map_plain = File.read( "#{File.dirname(__FILE__)}/map_2.txt" )
   
     map_plain.split( "\n" ).each_with_index do |row, row_index|
       @tiles[row_index] = []

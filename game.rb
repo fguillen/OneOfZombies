@@ -5,20 +5,20 @@ end
 
 require 'gosu'
 
-require 'animation'
-require 'tool_box'
-require 'map'
-require 'panel'
+require "#{File.dirname(__FILE__)}/animation"
+require "#{File.dirname(__FILE__)}/tool_box"
+require "#{File.dirname(__FILE__)}/map"
+require "#{File.dirname(__FILE__)}/panel"
 
-require 'sprite_status'
-require 'sprites/sprite'
-require 'sprites/blood'
-require 'sprites/bullet'
-require 'sprites/zombie'
-require 'sprites/hero'
-require 'sprites/helicopter'
-require 'sprites/innocent'
-require 'sprites/tile'
+require "#{File.dirname(__FILE__)}/sprite_status"
+require "#{File.dirname(__FILE__)}/sprites/sprite"
+require "#{File.dirname(__FILE__)}/sprites/blood"
+require "#{File.dirname(__FILE__)}/sprites/bullet"
+require "#{File.dirname(__FILE__)}/sprites/zombie"
+require "#{File.dirname(__FILE__)}/sprites/hero"
+require "#{File.dirname(__FILE__)}/sprites/helicopter"
+require "#{File.dirname(__FILE__)}/sprites/innocent"
+require "#{File.dirname(__FILE__)}/sprites/tile"
 
 module ZOrder
   Background = 0
@@ -76,7 +76,7 @@ end
 
 class Game < Gosu::Window
   attr_accessor :bullets, :admin
-  attr_reader :font, :font_small, :hero, :image_zombie, :image_bullet, :tb, :map, :innocents, :zombies
+  attr_reader :font, :font_small, :hero, :image_zombie, :image_bullet, :tb, :map, :innocents, :zombies, :pause
   attr_reader :helicopter, :panel
   
   
@@ -92,12 +92,12 @@ class Game < Gosu::Window
     @map.charge_map
     
     
-    @beep = Gosu::Sample.new(self, "media/Beep.wav")
-    @shoot = Gosu::Sample.new(self, "media/shoot.mp3")
-    @zombie_eaten = Gosu::Sample.new(self, "media/zombie_eaten_2.wav")
-    @helicopter_get_an_innocent = Gosu::Sample.new(self, "media/helicopter_get_an_innocent.wav")
-    @explosion = Gosu::Sample.new(self, "media/Explosion.wav")
-    @aahhh = Gosu::Sample.new(self, "media/aahhh.wav")
+    @beep = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/Beep.wav")
+    @shoot = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/shoot.mp3")
+    @zombie_eaten = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/zombie_eaten_2.wav")
+    @helicopter_get_an_innocent = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/helicopter_get_an_innocent.wav")
+    @explosion = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/Explosion.wav")
+    @aahhh = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/aahhh.wav")
     
     
     @hero = self.initialize_hero
@@ -481,5 +481,5 @@ class Game < Gosu::Window
   end
 end
 
-window = Game.new
-window.show
+# window = Game.new
+# window.show
