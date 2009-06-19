@@ -331,7 +331,7 @@ class Game < Gosu::Window
             
             if @hero.life <= 0
               @aahhh.play
-              @panel.add_message 'son or latter, it should happend.. I\'m a zombie'
+              @panel.add_message 'son or latter, it should happen.. I\'m a zombie'
               @panel.add_message ''
               @panel.add_message ''
               @panel.add_message ''
@@ -470,7 +470,7 @@ class Game < Gosu::Window
     end
     
     
-    if( @hero.status_name == 'helicopter' && id == Gosu::Button::KbG )
+    if( @hero.status_name == 'helicopter' && @helicopter.status_name == 'inspection' && id == Gosu::Button::KbG )
       @helicopter.status = @helicopter.statuses[:comming]
       @helicopter.tile_destination = self.map.random_walkable_tile
       @helicopter.angle = Gosu::angle( @helicopter.x, @helicopter.y, @helicopter.tile_destination.x, @helicopter.tile_destination.y )
