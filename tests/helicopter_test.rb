@@ -4,7 +4,10 @@ require '../game.rb'
 class HelicopterTest < Test::Unit::TestCase
   def test_button_down
     window = Game.new
-    # window.show
+    
+    Thread.new do
+      window.show
+    end
 
     puts "window.pause: #{window.pause}"
     # window.button_down( Gosu::Button::KbS )    
