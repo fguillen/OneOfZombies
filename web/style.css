@@ -87,6 +87,8 @@ hr {
 
 #header span {
   color: #ed242c;
+  font-weight:bold;
+  padding-left:5px;
 }
 
 #header p {
