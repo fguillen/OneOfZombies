@@ -481,5 +481,5 @@ class Game < Gosu::Window
   end
 end
 
-# window = Game.new
-# window.show
+window = Game.new
+window.show

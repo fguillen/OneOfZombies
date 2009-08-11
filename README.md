@@ -1,5 +1,6 @@
 # One Of Zombies
 
+[OneOfZombies official site](http://oneofzombies.com)
 
 ## Diclaimer
 
@@ -14,6 +15,15 @@ No good frame rate with ruby 1.8.. better with ruby 1.9
 
 Look the [downloads section](http://github.com/fguillen/OneOfZombies/downloads "Download Section")
 
+## Running it from source
+
+Download the lastest release a run
+
+  $ ruby game.rb
+  
+For a fluid experience use ruby 1.9:
+
+  $ ruby1.9 game.rb
 
 ## Instructions
 
