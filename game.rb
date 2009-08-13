@@ -93,7 +93,7 @@ class Game < Gosu::Window
     
     
     @beep = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/Beep.wav")
-    @shoot = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/shoot.mp3")
+    @shoot = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/shoot.wav")
     @zombie_eaten = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/zombie_eaten_2.wav")
     @helicopter_get_an_innocent = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/helicopter_get_an_innocent.wav")
     @explosion = Gosu::Sample.new(self, "#{File.dirname(__FILE__)}/media/Explosion.wav")
