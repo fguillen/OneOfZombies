@@ -1,0 +1,213 @@
+Sorry this is a little long and rambling. I think given the size, this will be it for me.
+
+On Fri, Dec 11, 2009 at 12:22 PM, Fernando Guillen <fguillen.mail@gmail.com> wrote (edited out of order)
+
+
+
+    PD: Rocky I hope you didn't mind I send my answer on the list and not
+    directly to you
+
+
+I don't mind as long as you correct my grammar and spelling mistakes. ;-)
+
+I'll reply this time to the list. However I suspect as this is getting more about that specific program and how it is written, there may be an exponential drop off in interest.
+
+I indulge others this one (probably last) time, since the important part of what follows is about how to develop programs in a style I've found helpful.
+
+
+    Hi Rocky, I'm very happy you enjoyed the talk :)
+
+    All your recommendations look good and I think my code fails on almost
+    all of them, 
+
+
+Ok. So allow me take the code that you wrote and show you how I think you can start to make it more modular. ...
+
+ 
+
+    leave me comment them:
+
+    On Thu, Dec 10, 2009 at 11:43 PM, Rocky Bernstein <rockyb@rubyforge.org> wrote:
+    >
+    [snip]
+
+    > The things that I find help out
+    >
+    > * small, modular, stand-alone programs
+
+    MMM.. fail.. I think no one part of my code could be used without the
+    rest of the project, I mean: everything is so dependent  of everything.
+
+    One class call to another to know something and this other to other,
+    and comeback again...
+
+
+
+Modular code is more easily testable, and that is why I prefer working on or contributing to code that has unit tests - it suggests that there is possibly a reasonable level of modularity, which means I will be more easily able to understand it.
+
+Let's take the "blood" class which I guess is there just to display blood after a person has been shot.
+
+I'd like to be able to use that as much as possible in isolation which you say is hard to do. But let's see how for we can get. To work with blood, I probably don't need other sprites like helicopter.
+
+Rather than try to hit this with a unit test, let's just try adding a little code so that I can run blood.rb and demo. I think it was Mark Pilgrim's Dive into Python where I read about this idea. We will add to the end of blood.rb:
+  if __FILE__ == $0
+     Blood.new ...
+  end
+
+The first thing you'll find if you try to do this, is get a compilation error because Blood is a subclass of Sprite, but class Sprite isn't defined anywhere. So to make this stand more on its own, we need to add to the top of the file:
+   require_relative 'sprite'
+
+(I'm going to assume Ruby 1.9  since that reduces the amount of stuff I need to add. I assume that folks will know how to adapt to Ruby 1.8 or either Ruby 1.8/1.9).
+
+The other place where that class seems to use something that is not passed into its initialization is ZOrder::Blood. This is defined in game.rb. But here I don't want all that other stuff in game.rb, just the z-axis ordering for blood. Okay, I'll live with a little bit of extra stuff. So what I suggest is pulling out module ZOrder and putting that into its own little file. Recall I said small modular code.  Ironically,  ZOrder is exactly a single Ruby Module.
+
+There is I suppose a sense of aesthetics in terms of how much to put in a file. I imagine others would combine both modules Conf and ZOrder into a single file. But probably the important thing is to separate them from game.rb so they could be used as I am suggesting inside blood.rb
+
+I noticed in your talk, for purposes of demonstration you were changing values inside the Conf module - that is, you were cheating to make the came easier!  This is again perhaps an aesthetic thing, but my own take is that if there are parameters I or others are going to edit, I'd rather they live in a file which is in isolation of say business logic for running the game. So this is another reason why I think these modules are better off outside of the game.rb file.
+
+So having changed these two require's at the top of the file, we're ready to give the full standalone code to add to the bottom of the code.
+
+if __FILE__ == $0
+  require 'gosu'
+  require_relative '../tool_box'
+
+  class Game < Gosu::Window
+    attr_accessor :tb
+    def initialize
+      super(50, 10, false)
+      @tb = ToolBox.new(self)
+    end
+  end
+
+  window = Game.new
+  blood = Blood.new(window, 10, 10)
+  # Stuff you want to show off with respect to blood.
+end
+
+I don't know gosu well enough to continue with the stuff you might want to do to show off blood. I imagine it might be for example that you can create several instances and get different and random kinds blood splats.
+
+Although I haven't created say a unit or integration test here, I think the above steps get you along the way towards doing that. And if you want to make it easier for others to understand and modify the code, the above may help. At least it would for someone like me.
+
+If you were to continue in this way with the other sprites, you might find a bit of repeated setup code, in particular defining the Game class. So you might want to create a file with this mock Game class in and require that.
+
+
+    > * "unit" (or "white box") tests
+    > * "integration' (larger "black box") tests
+
+    This is other of the big fails of my code, I tried to write
+    integration tests for my game, and I started to obtain something, the
+    big problem is that the only way I found the integration tests could
+    be done is calling to the Gosu::Window.new on a Thread and from
+    another threads simulate keys pulsations like this:
+
+       window = Game.new
+
+       Thread.new do
+         window.show
+       end
+
+       window.button_down( Gosu::Button::KbG )
+       assert_equal( 'inspection', window.helicopter.status_name )
+
+    In an incredible world it works.. :) but finally I didn't write test. :/
+
+
+There is also something sort of in the middle that I've been calling "functional" tests. These are uses/tests of  largish sections of the code. And for that I don't think you need threads, but just create some mock objects.
+
+I don't want to get into the full detail of how to do this. But for an example look at how rbdbgr handles it.
+
+ 
+
+
+
+    > * relative loading (i.e. no "installation" of the program needed)
+
+    Ok, OneOfZombies doesn't need installation.. if you have ruby, gosu and all :)
+
+    >
+    > And if you can do it, there are a couple of other things
+    >
+    > * being able to go into an interactive shell (or I often use a debugger), and
+
+    No way, you mean a kind of script/console.. uauu.. I didn't build it,
+    but is a fucking good idea.
+
+
+Well, I did suggest that one could use a debugger in its place. The debuggers I use allow you go go into say irb from them. But debuggers can be a bit big and may have problems of their own. So even without using a full-fledged debugger one can consult it or perhaps a dozen other kinds of programs work to find out how to invoke irb from inside a Ruby program.
+
+(To verify that I practice what I preach, try running that one file and give it some sort of bogus argument. You should find yourself inside irb. The reason for the bogus argument is so that I can run the file to just do a simple syntax + basic run check which might occur in concert in batch mode with a number of other small files; so I want to be able to run each invocation to terminate without any further input.)
+
+
+    > * being able to reload parts of the program from inside the program if you find mistake or want to add a new feature.
+
+    Another awesome idea..
+
+    >
+    > Although these weren't invented by Ruby/Rails now are they even new, Ruby/Rails showed the way that this could be done inside of Ruby. After all, Ruby/Rails is just a pure Ruby program!
+
+    The problem I tried to explain was not any of the above ones, it is
+    something previous to all of this and much more basic on a way:
+
+    * Where should I put the logic of the collisions: in the creatures, on
+    a class called CollisionDetected, on the Main game,... ?
+    * How can I access to the position of the Helicopter from a Zombie
+    instance? should I use a global variable?, should I keep the variable
+    instance on the Main class and the Main class instance would be a
+    global variable? should the zombie have any idea at all of the
+    position of the helicopter?
+    * Where should I build the map?
+    * What is the blood? Is a new creature? or is the same instance than
+    the Zombie but on another status?
+
+    * Who does manage the animations? The creatures it self?
+    * Who change the status of the creatures? does the bullet creature
+    change the status of the Zombie or is the CollisionDetected class.. or
+    even is the self Zombie instance?
+
+
+All good interesting questions. But although it is not inconceivable that someone at the NYC Ruby meeting has experience here, I would have found it surprising if you were to have gotten an answer. ;-)
+
+Furthermore I am not sure how you would have or could have gotten a meaningful answer which doesn't take into effect the game and what you want to be able to do with it. I am reminded of the original Adventure game where every now and then a little dwarf might appear and enter into the room with you. Occasionally it would throw a nasty knife at you. It felt to me that these dwarfs weren't really "objects" in the same way as there were other objects like the platinum pyramid that you could take or drop and carry along. But for that game, obviously representing dwarf as a non-object was okay for that kind of use; I don't think the game any the less so for working that way. (I think part of the fun of the original Adventure game was in trying to understand what its model of the world was and the realization that the help pretty much told you everything.)
+
+So now that we have a start for how to deal with blood in isolation, one might have a better handle on testing different kinds of capabilities and behaviors of blood. And from that then can gain experience on what those implications mean.
+
+Here is an example drawn from my own experience. If you look at the stock Python debugger pdb, each debugger command is a method inside a command class. In ruby-debug, each debugger command is a class. If I were to ask the question in the abstract, "Is it better in a debugger to represent each command as a method or a class?" again I would be surprised to get anything but blank looks. And if someone did give me an answer, I'm not sure I would believe them without further elaboration.
+
+But now that I've tried both, I know full well what the differences are and when I might want one over the other.
+
+
+
+
+
+    I mean.. what I think I need is read something about games development
+    patterns I'm sure it will clarify my doubts.
+
+    I think I already know what I wanted to say:
+
+    * What important that the patterns are and what helpful they are, and
+    how much used we are to use the MVC and how many more times we should
+    say it ThankYou
+
+
+I wholeheartedly agree with that.
+
+Also interesting to me though is how one develops the models and my thoughts towards how might goes about this are suggested above.
+
+Back to Rails...
+Note that databases (the M part) and database views (the V part) go back a long way. One of the many new and interesting ideas in Rails was to try and implement Martin Fowler's ActiveRecord design pattern. But there are other interesting things in Ruby/Rails as well.
+
+Above, you talk about how tough it might be to create integration tests, and verily I hear this a lot when I mention integration tests.
+
+But consider what Rails does in terms of replicating the database schema inside a test database, and populating it with data and wrapping tests inside transactions (unless told not to). Or what goes on when you run ./script/console. Clearly this is not trivial stuff. If Rails can do it, you can too!
+
+
+
+    :D that's my revelation from today
+
+    >
+    > Anyway, keep up the good work!
+    >
+
+    Regards.. and thanks
+
+    f.
