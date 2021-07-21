@@ -1,6 +1,6 @@
 # One Of Zombies
 
-[OneOfZombies official site](http://oneofzombies.com)
+[OneOfZombies official site](https://fguillen.github.io/OneOfZombies/web/)
 
 ## Diclaimer
 
